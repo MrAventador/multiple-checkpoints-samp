@@ -30,7 +30,7 @@ Just copy and paste Cps.inc into your pawno/include folder and use #include <Cps
 >       1 if function executed successfully
 >* **Remarks:**
 
->       It will print an error message if it fails to destroy the checkpoint(cpid is invalid)
+>       It will print an error message if it fails to destroy the checkpoint(cpid is invalid or player is not connected)
 
 # Callbacks:
 
