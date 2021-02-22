@@ -124,6 +124,11 @@ forward OnPlayerLeaveCP(playerid, cpid);
 
 stock ShowCP(playerid, Float:x, Float:y, Float:z)
 {
+	if(!IsPlayerConnected(playerid))
+	{
+		printf("Tried to create a checkpoint for an offline player: X: %f, Y: %f, Z: %f, playerid: %i", x, y, z, playerid);
+		return 0;
+	}
 	new cpid = -1;
 	for(new i; i < MAX_CPS; i++)
 	{
@@ -143,6 +148,11 @@ stock ShowCP(playerid, Float:x, Float:y, Float:z)
 
 stock DestroyCP(playerid, cpid)
 {
+	if(!IsPlayerConnected(playerid))
+	{
+		printf("Tried to delete a checkpoint for an offline player: CPID %i, playerid %i", cpid, playerid);
+		return 0;
+	}
 	if(!(0 <= cpid <= 99) || CP@Cylinder[playerid][cpid] == INVALID_DYNAMIC_AREA)
 	{
 		printf("Tried to delete a non-existing checkpoint: CPID %i, playerid %i", cpid, playerid);
