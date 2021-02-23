@@ -19,7 +19,7 @@ KJason for making this include
 	#error You need to include a_samp.inc before this include
 #endif
 
-#if !defined CreateDynamicCylinder
+#if !defined _streamer_included
 	#error You need to include streamer.inc before this include
 #endif
 
@@ -164,7 +164,7 @@ stock DestroyCP(playerid, cpid)
 	return 1;
 }
 
-public OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA areaid)
+public OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA: areaid)
 {
 	for(new i; i < MAX_CPS; i++)
 	{
@@ -195,7 +195,7 @@ public OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA areaid)
 	forward cp_OnPlayerEnterDynamicArea(playerid, areaid);
 #endif
 
-public OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA areaid)
+public OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA: areaid)
 {
 	for(new i; i < MAX_CPS; i++)
 	{
