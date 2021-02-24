@@ -13,6 +13,7 @@
 SA-MP Team for SA-MP
 Incognito for Streamer
 KJason for making this include
+Emmett White for helping with streamer tags
 
 */
 #if !defined _samp_included
@@ -38,10 +39,17 @@ KJason for making this include
 
 static 
 	CP@MIUsed[MAX_PLAYERS][MAX_CPS],
-	CP@Cylinder[MAX_PLAYERS][MAX_CPS];
+	CP@Cylinder[MAX_PLAYERS][MAX_CPS],
+	CP@Count[MAX_PLAYERS];
 
 stock cp_SetPlayerMapIcon(playerid, iconid, Float:x, Float:y, Float:z, markertype, color, style = MAPICON_LOCAL)
 {
+	if(CP@MIUsed[playerid][iconid])
+	{
+		print("[cps.inc]: Tried to set a map icon for an already used slot:");
+		printf("[cps.inc]: playerid: %i, iconid: %i, X: %f, Y: %f, Z:%f, type: %i, colour: %06x, style: %i.", playerid, iconid, x, y, z, markertype, color, style);
+		return 0;
+	}
 	CP@MIUsed[playerid][iconid] = true;
 	return SetPlayerMapIcon(playerid, iconid, Float:x, Float:y, Float:z, markertype, color, style);
 }
@@ -56,7 +64,7 @@ stock cp_SetPlayerMapIcon(playerid, iconid, Float:x, Float:y, Float:z, markertyp
 stock cp_RemovePlayerMapIcon(playerid, iconid)
 {
 	CP@MIUsed[playerid][iconid] = false;
-	if(CP@Cylinder[playerid][iconid] != INVALID_DYNAMIC_AREA)
+	if(IsValidPlayerCP(playerid, iconid))//Just to prevent possible bugs...
 	{
 		DestroyDynamicArea(CP@Cylinder[playerid][iconid]);
 		CP@Cylinder[playerid][iconid] = INVALID_DYNAMIC_AREA;
@@ -78,6 +86,7 @@ public OnPlayerConnect(playerid)
 		CP@MIUsed[playerid][i] = false;
 		CP@Cylinder[playerid][i] = INVALID_DYNAMIC_AREA;
 	}
+	CP@Count[playerid] = 0;
 	#if defined cp_OnPlayerConnect
 		return cp_OnPlayerConnect(playerid);
 	#else
@@ -97,11 +106,7 @@ public OnPlayerConnect(playerid)
 
 public OnPlayerDisconnect(playerid, reason)
 {
-	for(new i; i < MAX_CPS; i++)
-	{
-		if(CP@Cylinder[playerid][i] == INVALID_DYNAMIC_AREA)continue;
-		DestroyCP(playerid, i);
-	}
+	DestroyAllCPs(playerid);
 	#if defined cp_OnPlayerDisconnect
 		return cp_OnPlayerDisconnect(playerid, reason);
 	#else
@@ -122,11 +127,11 @@ public OnPlayerDisconnect(playerid, reason)
 forward OnPlayerEnterCP(playerid, cpid);
 forward OnPlayerLeaveCP(playerid, cpid);
 
-stock ShowCP(playerid, Float:x, Float:y, Float:z)
+stock ShowCP(playerid, Float:x, Float:y, Float:z, iconcolour = 0xAA00000FF)
 {
 	if(!IsPlayerConnected(playerid))
 	{
-		printf("Tried to create a checkpoint for an offline player: X: %f, Y: %f, Z: %f, playerid: %i", x, y, z, playerid);
+		printf("[cps.inc]: Tried to create a checkpoint for an offline player: X: %f, Y: %f, Z: %f, playerid: %i", x, y, z, playerid);
 		return 0;
 	}
 	new cpid = -1;
@@ -138,44 +143,104 @@ stock ShowCP(playerid, Float:x, Float:y, Float:z)
 	}
 	if(cpid == -1)
 	{
-		printf("Failed to create a checkpoint: No free mapicon slot available. X: %f, Y: %f, Z: %f, playerid: %i", x, y, z, playerid);
+		printf("[cps.inc]: Failed to create a checkpoint: No free mapicon slot available. X: %f, Y: %f, Z: %f, playerid: %i", x, y, z, playerid);
 		return INVALID_CP_ID;
 	}
-	SetPlayerMapIcon(playerid, cpid, x, y, z, 0, 0xAA00000FF, MAPICON_GLOBAL_CHECKPOINT);
+	SetPlayerMapIcon(playerid, cpid, x, y, z, 0, iconcolour, MAPICON_GLOBAL_CHECKPOINT);
 	CP@Cylinder[playerid][cpid] = CreateDynamicCylinder(x, y, z - 0.5, z + 0.5, 1.3, .playerid = playerid);
+	CP@Count[playerid] += 1;
 	return cpid;
 }
+
+stock IsValidPlayerCP(playerid, cpid)return ((0 <= cpid <= 99) && IsValidDynamicArea(CP@Cylinder[playerid][cpid]));
 
 stock DestroyCP(playerid, cpid)
 {
 	if(!IsPlayerConnected(playerid))
 	{
-		printf("Tried to delete a checkpoint for an offline player: CPID %i, playerid %i", cpid, playerid);
+		printf("[cps.inc]: Tried to delete a checkpoint for an offline player: CPID %i, playerid %i", cpid, playerid);
 		return 0;
 	}
-	if(!(0 <= cpid <= 99) || CP@Cylinder[playerid][cpid] == INVALID_DYNAMIC_AREA)
+	if(!IsValidPlayerCP(playerid, cpid))
 	{
-		printf("Tried to delete a non-existing checkpoint: CPID %i, playerid %i", cpid, playerid);
+		printf("[cps.inc]: Tried to delete a non-existing checkpoint: CPID %i, playerid %i", cpid, playerid);
 		return 0;
 	}
 	DestroyDynamicArea(CP@Cylinder[playerid][cpid]);
 	CP@Cylinder[playerid][cpid] = INVALID_DYNAMIC_AREA;
 	RemovePlayerMapIcon(playerid, cpid);
+	CP@Count[playerid] -= 1;
 	return 1;
+}
+
+stock DestroyAllCPs(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+	{
+		printf("[cps.inc]: Tried to delete all checkpoints for an offline player: playerid %i", playerid);
+		return 0;
+	}
+	for(new i; i < MAX_CPS; i++)
+	{
+		if(CP@Cylinder[playerid][i] == INVALID_DYNAMIC_AREA)continue;
+		DestroyDynamicArea(CP@Cylinder[playerid][i]);
+		CP@Cylinder[playerid][i] = INVALID_DYNAMIC_AREA;
+		RemovePlayerMapIcon(playerid, i);
+	}
+	CP@Count[playerid] = 0;
+	return 1;
+}
+
+stock bool:IsPlayerInCP(playerid, cpid)
+{
+	if(!IsPlayerConnected(playerid))
+	{
+		printf("[cps.inc]: Tried to use IsPlayerInCP on an offline player. playerid: %i, CPID: %i", playerid, cpid);
+		return false;
+	}
+	if(!IsValidPlayerCP(playerid, cpid))
+	{
+		printf("[cps.inc]: Tried to use IsPlayerInCP with an invalid checkpoint id. playerd: %i, CPID: %i.", playerid, cpid);
+		return false;
+	}
+	return (IsPlayerInDynamicArea(playerid, CP@Cylinder[playerid][cpid]));
+}
+
+stock bool:DoesHaveAnyCP(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+	{
+		printf("[cps.inc]: Tried to use DoesHaveAnyCP on an offline player. playerid: %i", playerid);
+		return false;
+	}
+	return (CP@Count[playerid] > 0);
+}
+
+stock CountPlayerCPs(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+	{
+		printf("[cps.inc]: Tried to use CountPlayerCPs on an offline player. playerid: %i", playerid);
+		return false;
+	}
+	return CP@Count[playerid];
 }
 
 public OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA: areaid)
 {
-	for(new i; i < MAX_CPS; i++)
+	if(DoesHaveAnyCP(playerid))
 	{
-		if(areaid == CP@Cylinder[playerid][i])
+		for(new i; i < MAX_CPS; i++)
 		{
-			#if defined FILTERSCRIPT
-				CallRemoteFunction("OnPlayerEnterCP", "ii", playerid, i);
-			#else
-				CallLocalFunction("OnPlayerEnterCP", "ii", playerid, i);
-			#endif
-			break;
+			if(areaid == CP@Cylinder[playerid][i])
+			{
+				#if defined FILTERSCRIPT
+					CallRemoteFunction("OnPlayerEnterCP", "ii", playerid, i);
+				#else
+					CallLocalFunction("OnPlayerEnterCP", "ii", playerid, i);
+				#endif
+				break;
+			}
 		}
 	}
 	#if defined cp_OnPlayerEnterDynamicArea
@@ -197,16 +262,19 @@ public OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA: areaid)
 
 public OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA: areaid)
 {
-	for(new i; i < MAX_CPS; i++)
+	if(DoesHaveAnyCP(playerid))
 	{
-		if(areaid == CP@Cylinder[playerid][i])
+		for(new i; i < MAX_CPS; i++)
 		{
-			#if defined FILTERSCRIPT
-				CallRemoteFunction("OnPlayerLeaveCP", "ii", playerid, i);
-			#else
-				CallLocalFunction("OnPlayerLeaveCP", "ii", playerid, i);
-			#endif
-			break;
+			if(areaid == CP@Cylinder[playerid][i])
+			{
+				#if defined FILTERSCRIPT
+					CallRemoteFunction("OnPlayerLeaveCP", "ii", playerid, i);
+				#else
+					CallLocalFunction("OnPlayerLeaveCP", "ii", playerid, i);
+				#endif
+				break;
+			}
 		}
 	}
 	#if defined cp_OnPlayerLeaveDynamicArea
