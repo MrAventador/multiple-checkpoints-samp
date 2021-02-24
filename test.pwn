@@ -37,7 +37,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		GetPlayerPos(playerid, x, y, z);
 		ShowCP(playerid, x, y, z);
 	}
-	else if(!strcmp(cmdtext, "/test2", true, 5))
+	else if(!strcmp(cmdtext, "/test2", true, 6))
 	{
 		DestroyAllCPs(playerid);
 	}
