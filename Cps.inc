@@ -38,7 +38,7 @@ Emmett White for helping with streamer tags
 #define MAX_CPS 100
 
 static 
-	CP@MIUsed[MAX_PLAYERS][MAX_CPS],
+	bool:CP@MIUsed[MAX_PLAYERS][MAX_CPS],
 	CP@Cylinder[MAX_PLAYERS][MAX_CPS],
 	CP@Count[MAX_PLAYERS];
 
