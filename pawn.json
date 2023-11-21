@@ -1,0 +1,13 @@
+{
+	"user": "MrAventador",
+	"repo": "multiple-checkpoints-samp-sampctl",
+	"tag": "0.0.1",
+	"entry": "test.pwn",
+	"output": "gamemodes/test.amx",
+	"dependencies": [
+		"pawn-lang/samp-stdlib"
+	],
+	"runtime": {
+		"mode": "y_testing"
+	}
+}
