@@ -14,7 +14,7 @@ public OnGameModeInit()
 //==================================================================================
 public OnPlayerEnterCP(playerid, cpid)
 {
-	new str[10];
+	new str[16];
 	format(str, sizeof(str), "CPID: %i", cpid);
 	SendClientMessage(playerid, -1, str);
 	return 1;
@@ -22,7 +22,7 @@ public OnPlayerEnterCP(playerid, cpid)
 //==================================================================================
 public OnPlayerLeaveCP(playerid, cpid)
 {
-	new str[10];
+	new str[16];
 	format(str, sizeof(str), "LCPID: %i", cpid);
 	SendClientMessage(playerid, -1, str);
 //	DestroyCP(playerid, cpid);
