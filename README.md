@@ -1,7 +1,7 @@
 # multiple-checkpoints-samp
 This include lets you create more than one checkpoint at the same time!(Requires Incognito's Streamer)
 
-P.S: If your server's player base is using the android client this will NOT work for them and probably makes their game crash.
+P.S: If your server's player base is using the android client this will NOT work for them and will probably make their game crash.
 
 <a href="https://ibb.co/zX4JTJc"><img src="https://i.ibb.co/hBmfJf5/photo-2021-02-23-00-34-07.jpg" alt="photo-2021-02-23-00-34-07" border="0"></a>
 
