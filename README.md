@@ -3,9 +3,9 @@ This include lets you create more than one checkpoint at the same time!(Requires
 
 P.S: If your server's player base is using the android client this will NOT work for them and will probably make their game crash.
 
-<a href="https://ibb.co/zX4JTJc"><img src="https://i.ibb.co/hBmfJf5/photo-2021-02-23-00-34-07.jpg" alt="photo-2021-02-23-00-34-07" border="0"></a>
+<img src="https://github.com/MrAventador/multiple-checkpoints-samp/blob/main/screenshots/1.jpg">
 
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/3mb9gFp/photo-2021-02-23-00-34-08.jpg" alt="photo-2021-02-23-00-34-08" border="0"></a>
+<img src="https://github.com/MrAventador/multiple-checkpoints-samp/blob/main/screenshots/2.jpg">
 
 # How to install:
 Just copy and paste Cps.inc into your pawno/include folder and use #include <Cps.inc> in your script after including a_samp and streamer, then use the functions provided to create and manage your checkpoints.
