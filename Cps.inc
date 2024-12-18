@@ -226,6 +226,26 @@ stock CountPlayerCPs(playerid)
 	return CP@Count[playerid];
 }
 
+stock GetCPPosition(playerid, cpid, &Float:x, &Float:y, &Float:z)
+{
+	if(!IsPlayerConnected(playerid))
+	{
+		printf("[cps.inc]: Tried to use GetCPPosition on an offline player. playerid: %i", playerid);
+		return 0;
+	}
+
+	if(!IsValidPlayerCP(playerid, cpid))
+	{
+		printf("[cps.inc]: Tried to use GetCPPosition with an invalid checkpoint id. playerd: %i, CPID: %i.", playerid, cpid);
+		return 0;
+	}
+
+	x = CP@Positions[playerid][cpid][0];
+	y = CP@Positions[playerid][cpid][1];
+	z = CP@Positions[playerid][cpid][2];
+	return 1;
+}
+
 public OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA: areaid)
 {
 	if(DoesHaveAnyCP(playerid))
